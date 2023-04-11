@@ -6,6 +6,8 @@ from rest_framework.decorators import action
 from .models import FireAlert
 from .serializers import FireAlertSerializer
 import pyrebase
+import requests as r
+import json
 
 config = {
     "apiKey": "AIzaSyBncKfVp7uLOE9n2oILjPl25R1CCUvAZzQ",
@@ -24,27 +26,44 @@ db = firebase.database()
 
 
 class FireAlertApiView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         data = db.child("dataset").get().val()
         # data = FireAlert.objects.filter(user=request.user.id)
         serializer = FireAlertSerializer(data, many=True)
         return Response(data, status=200)
+    
+   
+    
+class FireAlertExpoTokenApiView(APIView):
+     #permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
+     def post(self, request, *args, **kwargs):
         '''
         Create the Todo with given todo data
         '''
         data = {
-            'img': request.data.get('img'),
-            'isFire': request.data.get('isFire'),
-            'user': request.user.id
+            'expo_token': request.data.get('expo_token'),
         }
-        res = db.child("dataset").push(data)
-        # serializer = FireAlertSerializer(data=data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(serializer.data, status=201)
-
+        res = db.child("expo_token").push(data)
         return Response(res, status=201)
+     
+
+     def get(self, request, *args, **kwargs):
+        expo_token_db = db.child("expo_token").get().val()
+        expo_token = []
+        for i in expo_token_db.values():
+            expo_token.append(i['expo_token'])
+        if expo_token == []:
+            return Response(status=404)
+        print(expo_token)
+        message = {
+        'to' : expo_token,
+        'title' : 'Fire Alert',
+        'body' : 'Fireeeeeee'
+        }
+        r.post('https://exp.host/--/api/v2/push/send', json=message)
+        return Response(message, status=200)
+     
+
