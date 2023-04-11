@@ -12,3 +12,9 @@ class FireAlert(models.Model):
 
     def __str__(self):
         return self.task
+
+class FireAlertExpoToken(models.Model):
+    expo_token = models.CharField(max_length=300)
+    
+    def __str__(self):
+        return self.task
