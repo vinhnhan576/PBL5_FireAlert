@@ -8,6 +8,7 @@ from .serializers import FireAlertSerializer
 import pyrebase
 import requests as r
 import json
+import pickle
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
@@ -57,7 +58,7 @@ class FireAlertExpoTokenApiView(APIView):
 
      def get(self, request, *args, **kwargs):
         expo_token_db = db.child("expo_token").get().val()
-        expo_token = []
+        expo_token = ["ExponentPushToken[8zzCsnHz6fU-3mojEDwZ7G]","ExponentPushToken[sMwQqMA455P2EMibhjwAkY]","ExponentPushToken[m3AhxeB2rI0MjygyhRz01Y]"],
         for i in expo_token_db.values():
             expo_token.append(i['expo_token'])
         if expo_token == []:
@@ -75,11 +76,31 @@ class FireAlertExpoTokenApiView(APIView):
 class FireAlertImageApiView(APIView):
     def post(self, request, *args, **kwargs):
         image = request.FILES["image"]
+        # image_numpy = pickle.loads(image.read())
         print(image)
         image = File(image)
         name = str(image.name).split('\\')[-1]
-        name += '.jpg'
-        image.name = name
+        # image.name = name
         db.child("image").push(name)
         storage.child(name).put(image)
+
+        # expo_token_db = db.child("expo_token").get().val()
+        # expo_token = []
+        # for i in expo_token_db.values():
+        #     expo_token.append(i['expo_token'])
+        # if expo_token == []:
+        #     return Response(status=404)
+        #get last image from firebase
+        # image = db.child("image").get().val()
+        # image = list(image.values())[-1]
+        message = {
+        'to' : ["ExponentPushToken[8zzCsnHz6fU-3mojEDwZ7G]","ExponentPushToken[sMwQqMA455P2EMibhjwAkY]","ExponentPushToken[m3AhxeB2rI0MjygyhRz01Y]"],
+        'title' : 'Fire Alert',
+        'body' : 'Fireeeeeee',
+        'data' : {
+            'image' : name
+        }
+        }
+        r.post('https://exp.host/--/api/v2/push/send', json=message)
+
         return Response("Upload image to firebase successfully", status=200)
