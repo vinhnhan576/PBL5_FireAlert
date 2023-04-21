@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from datetime import date
 
 class FireAlert(models.Model):
     img = models.CharField(max_length=180)
@@ -18,3 +18,7 @@ class FireAlertExpoToken(models.Model):
     
     def __str__(self):
         return self.task
+
+class Image(models.Model):
+    image = models.ImageField(upload_to='images')
+    timestamp = models.TimeField((""), auto_now=True, auto_now_add=False)
